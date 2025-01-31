@@ -16,4 +16,26 @@ Static Constraints
     FacilityInventory >= 0
 
 
-Dynamic Constraints
+
+How Do we Solve this method?
+Brute force?
+    Absolutely Not, there are an unlimited number of possibilities
+
+Through Math? Good luck
+
+
+Branch And Bound? Now this reasonable. 
+But lets modify this idea, Lets think of this problem Backwards
+Instead of picking up supply and delivering, Lets pick up Demand and drop it off at supply.
+
+Why Does this work?
+The Cheapest Most efficient system is going to leverage maximizing load capacity
+a truck can only pick up  a certain demand because of its capacity. 
+
+If a county Fully fills one or more trucks, then the only location those trucks can go is a supplier, This stops the route length at 1
+This enables us to run an "initialization run" where we turn essentially use full trucks to scale down the problem.
+
+
+
+
+

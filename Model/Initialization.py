@@ -1,12 +1,25 @@
 import pandas as pd
-from Location import Location
+import Location
+from Distances import Matrix
+from Truck import Truck
+
+###############################################
+         ###Fixed Data Points ###
+###############################################
+
+#Initialize Distances
+Distances = Matrix("Matrix.csv")
 
 #Initialize Facilities
-File = 'FacilityDemandInventory.csv'
-data = pd.readcsv(File)
-LocationObjs = []
-for i in range(len(data)):
-    LocationObjs.append(Location(data["inventory"],data["demand"]))
-    
+locations = Location.Initialize('FacilityDemandInventory.csv')
 
+
+###############################################
+         ###Initial Deliveries(Capped Out) ###
+###############################################
+
+for i in range(len(locations)):
+    if locations[i][2] > Truck.TotalCapacity:
+        Truckcount = locations[i][2] // Truck.TotalCapacity
+        locations[i][2] = locations[i][2] % Truck.TotalCapacity
 #Initialize Trucks
