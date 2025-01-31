@@ -5,4 +5,15 @@
         Drop off = Positive
 
 
-Constraints
+Static Constraints
+
+    Truck capacity < Total Storage
+
+
+
+    
+    FacilityDemand = 0
+    FacilityInventory >= 0
+
+
+Dynamic Constraints
