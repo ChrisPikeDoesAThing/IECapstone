@@ -1,0 +1,8 @@
+ 
+ Let X be the number of water bottles transffered at facility
+    X can be both Positive and Negative
+        Pick up = Negative
+        Drop off = Positive
+
+
+Constraints
