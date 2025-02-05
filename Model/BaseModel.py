@@ -1,30 +1,46 @@
+import csv
+
+def csv_to_dict(csv_file):
+    data_dict = {}
+    id_list = []
+    
+    with open(csv_file, mode='r', newline='', encoding='utf-8') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            #print(row)
+            data_dict[row[0]] = int(float(row[2]))  # Convert QTY to integer if needed
+            id_list.append(row[0])
+    
+    return data_dict, id_list
+
+def csv_to_distance_dict(csv_file):
+    distance_dict = {}
+    
+    with open(csv_file, mode='r', newline='', encoding='utf-8') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            key = (row[0], row[1])
+            distance_dict[key] = float(row[2])  # Convert Distance to float if needed
+    
+    return distance_dict
+
+
+
+
 import pyomo.environ as pyo
 
-# Example Data
-suppliers = ['Supplier1', 'Supplier2']
-counties = ['CountyA', 'CountyB', 'CountyC']
+supply, suppliers = csv_to_dict('SupplierData.csv')
+demand, counties = csv_to_dict('CountyData.csv')
 
-# Supply at each supplier
-supply = {'Supplier1': 100, 'Supplier2': 150}
-
-# Demand at each county
-demand = {'CountyA': 80, 'CountyB': 70, 'CountyC': 100}
-
+#print(counties)
 # Distance matrix (distance from supplier to county)
-distance = {
-    ('Supplier1', 'CountyA'): 10,
-    ('Supplier1', 'CountyB'): 20,
-    ('Supplier1', 'CountyC'): 30,
-    ('Supplier2', 'CountyA'): 15,
-    ('Supplier2', 'CountyB'): 25,
-    ('Supplier2', 'CountyC'): 35,
-}
-
+distance = csv_to_distance_dict("DistanceList.csv")
+#print(distance)
 # Truck capacity
-truck_capacity = 50
+truck_capacity = 16000
 
 # Cost per unit-mile
-cost_per_unit_mile = 1.0
+cost_per_unit_mile = .156
 
 # Create the Pyomo model
 model = pyo.ConcreteModel()
