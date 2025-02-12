@@ -179,7 +179,7 @@ def fill_demand_competition(facilitylist, supply, demand):
     
     return demand, df_supply_distribution
 
-def recursive_distribution(facilitylist, supply, demand, current_distribution, min_distance, best_distribution):
+def recursive_distribution1(facilitylist, supply, demand, current_distribution, min_distance, best_distribution):
     if not supply or not demand:
         total_distance = sum(row[2] for row in current_distribution)
         if total_distance < min_distance[0]:
@@ -209,7 +209,7 @@ def recursive_distribution(facilitylist, supply, demand, current_distribution, m
                         new_demand[i][2] = str(demander_demand - supplier_supply)
                         recursive_distribution(facilitylist, remaining_supply, new_demand, new_distribution, min_distance, best_distribution)
 
-def find_optimal_distribution_recursive(facilitylist, supply, demand):
+def find_optimal_distribution_recursive1(facilitylist, supply, demand):
     min_distance = [float('inf')]
     best_distribution = []
     recursive_distribution(facilitylist, supply, demand, [], min_distance, best_distribution)
@@ -243,8 +243,8 @@ df2.to_csv(join_path("Model\CSVLib\SupplyDistributionCompetition.csv"), index=Fa
 save_demand_to_csv(correlated_demand, join_path("Model\CSVLib\CountyDataCorrelation.csv"))
 save_demand_to_csv(competition_demand, join_path("Model\CSVLib\CountyDataCompetition.csv"))
 
-df_optimal_distribution = find_optimal_distribution_recursive(facilitylist, supply, demand)
-df_optimal_distribution.to_csv(join_path("Model/CSVLib/OptimalSupplyDistributionRecursive.csv"), index=False)
+#df_optimal_distribution = find_optimal_distribution_recursive(facilitylist, supply, demand)
+#df_optimal_distribution.to_csv(join_path("Model/CSVLib/OptimalSupplyDistributionRecursive.csv"), index=False)
 
 
 
@@ -259,3 +259,67 @@ def FindOptimalDist():
 
 
 
+
+
+
+import numpy as np
+import pandas as pd
+from numba import cuda, float32, int32
+
+
+@cuda.jit
+def recursive_distribution_gpu(facilitylist, supply, demand, current_distribution, min_distance, best_distribution):
+    idx = cuda.grid(1)
+    if idx >= len(supply):
+        return
+
+    supplier = supply[idx]
+    supplier_id = supplier[0]
+    supplier_supply = int(float(supplier[2]))
+
+    for facility in facilitylist:
+        if facility[0] == supplier_id:
+            demander_id = facility[1]
+            distance = float(facility[2])
+            for i, demander in enumerate(demand):
+                if demander[0] == demander_id:
+                    demander_demand = int(float(demander[2]))
+                    if supplier_supply >= demander_demand:
+                        new_distribution = current_distribution + [[supplier_id, demander_id, demander_demand, distance]]
+                        new_demand = demand[:i] + demand[i+1:]
+                        recursive_distribution_gpu(facilitylist, supply[idx+1:], new_demand, new_distribution, min_distance, best_distribution)
+                    else:
+                        new_distribution = current_distribution + [[supplier_id, demander_id, supplier_supply, distance]]
+                        new_demand = demand[:]
+                        new_demand[i][2] = str(demander_demand - supplier_supply)
+                        recursive_distribution_gpu(facilitylist, supply[idx+1:], new_demand, new_distribution, min_distance, best_distribution)
+
+def find_optimal_distribution_recursive(facilitylist, supply, demand):
+    min_distance = [float('inf')]
+    best_distribution = []
+    threads_per_block = 128
+    blocks_per_grid = (len(supply) + (threads_per_block - 1)) // threads_per_block
+    recursive_distribution_gpu[blocks_per_grid, threads_per_block](facilitylist, supply, demand, [], min_distance, best_distribution)
+    df_supply_distribution = pd.DataFrame(best_distribution, columns=['SupplierID', 'DemanderID', 'SupplyAmount', 'Distance'])
+    return df_supply_distribution
+
+# Example usage
+facilitylist = read_csv_to_list(join_path("Model/CSVLib/DistanceListShort.csv"))
+facilitylist = sort_by_distance_list(facilitylist)
+
+supply = scale_supply(read_csv_to_list(join_path("Model/CSVLib/SupplierData.csv")), 1/52)
+demand = read_csv_to_list(join_path("Model/CSVLib/CountyData.csv"))
+
+print(f" The Total Supply is {sum_total_supply(supply)}")
+print(f" The Total Demand is {sum_total_demand(demand)}")
+
+correlated_demand, df1 = fill_demand_correlation(facilitylist, supply, demand)
+competition_demand, df2 = fill_demand_competition(facilitylist, supply, demand)
+
+df1.to_csv(join_path("Model/CSVLib/SupplyDistributionCorrelation.csv"), index=False)
+df2.to_csv(join_path("Model/CSVLib/SupplyDistributionCompetition.csv"), index=False)
+save_demand_to_csv(correlated_demand, join_path("Model/CSVLib/CountyDataCorrelation.csv"))
+save_demand_to_csv(competition_demand, join_path("Model/CSVLib/CountyDataCompetition.csv"))
+
+df_optimal_distribution = find_optimal_distribution_recursive(facilitylist, supply, demand)
+df_optimal_distribution.to_csv(join_path("Model/CSVLib/OptimalSupplyDistributionRecursive.csv"), index=False)
