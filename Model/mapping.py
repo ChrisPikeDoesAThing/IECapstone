@@ -1,6 +1,7 @@
 import folium
 import numpy as np
 import csv
+import pandas as pd
 
 def csv_to_list_of_lists(csv_file):
     """Reads a CSV file and returns its contents as a list of lists."""
@@ -30,6 +31,13 @@ def plot_points_on_map(factories,counties, map_center, zoom_start=10):
         folium.Marker([factories[i][1], factories[i][2]], popup=factories[i][0], tooltip=factories[i][0], icon=folium.CustomIcon('factory.png',icon_size=(40,40))).add_to(m)
     for i in range(len(counties)):
         folium.Marker([counties[i][1], counties[i][2]], popup=counties[i][0], tooltip=counties[i][0], icon=folium.CustomIcon('county.png',icon_size=(40,40))).add_to(m)
+        
+        
+    #routes = pd.read_csv("Model\CSVLib\Routes.csv", header=1)
+    for i in range(routes.shape[0]):
+        coordinates =[[routes.values[i][2],routes.values[i][3]],[routes.values[i][5],routes.values[i][6]]]
+        folium.PolyLine(coordinates, color="blue", weight=2.5, opacity=1).add_to(m)
+        
     return m
 
 # Example usage:

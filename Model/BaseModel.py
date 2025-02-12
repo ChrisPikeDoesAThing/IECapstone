@@ -1,4 +1,5 @@
 import csv
+import pandas as pd
 
 def csv_to_dict(csv_file):
     data_dict = {}
@@ -29,12 +30,12 @@ def csv_to_distance_dict(csv_file):
 
 import pyomo.environ as pyo
 
-supply, suppliers = csv_to_dict('SupplierData.csv')
-demand, counties = csv_to_dict('CountyData.csv')
+supply, suppliers = csv_to_dict('Model\CSVLib\SupplierData.csv')
+demand, counties = csv_to_dict('Model\CSVLib\CountyData.csv')
 
 #print(counties)
 # Distance matrix (distance from supplier to county)
-distance = csv_to_distance_dict("DistanceList.csv")
+distance = csv_to_distance_dict("Model\CSVLib\DistanceListShort.csv")
 #print(distance)
 # Truck capacity
 truck_capacity = 16000
@@ -96,7 +97,31 @@ results = solver.solve(model)
 # Print results
 print("Objective Value (Total Cost):", pyo.value(model.total_cost))
 print("\nShipments:")
+
+df = pd.DataFrame(columns=["Start", "End", "Units", "Trucks"])
 for s in model.suppliers:
     for c in model.counties:
         if pyo.value(model.x[s, c]) > 0:
-            print(f"Ship {pyo.value(model.x[s, c]):.2f} units from {s} to {c} using {pyo.value(model.trucks[s, c])} trucks")
+            df.loc[len(df)] = [s, c, pyo.value(model.x[s, c]), pyo.value(model.trucks[s, c])]
+            #print(f"Ship {pyo.value(model.x[s, c]):.2f} units from {s} to {c} using {pyo.value(model.trucks[s, c])} trucks")
+df.to_csv("Model\CSVLib\RoutesRaw.csv")
+
+def ProcessRoutes():
+    routedf = pd.read_csv("Model\CSVLib\RoutesRaw.csv", header=1)
+    locs = pd.read_csv('Model\CSVLib\Locations.csv',header=0)
+
+
+    newdf = pd.DataFrame(columns=["Start","StartLat","StartLon", "End","EndLat","EndLon", "Units", "Trucks"])
+    for i in range(routedf.shape[0]):
+        startid = routedf.values[i][1]
+        endid = routedf.values[i][2]
+        startlat,startlon = locs.loc[locs['ID'] == startid].values[0][2],locs.loc[locs['ID'] == startid].values[0][3]
+        endlat,endlon = locs.loc[locs['ID'] == endid].values[0][2], locs.loc[locs['ID'] == endid].values[0][3]
+        
+        newdf.loc[len(newdf)] = [startid,startlat,startlon,endid,endlat,endlon,routedf.values[i][3],routedf.values[i][4]]
+    
+    newdf.to_csv("Model\CSVLib\Routes.csv")
+    return
+
+ProcessRoutes()
+
