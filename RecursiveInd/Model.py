@@ -107,46 +107,6 @@ def save_demand_to_csv(demand, file_path):
     df_demand.to_csv(file_path, index=False)
     return
 
-
-def fill_demand_correlation(facilitylist, supply, demand):
-    # Create a dictionary to store remaining demand
-    remaining_demand = {row[0]: int(float(row[2])) for row in demand}
-    
-    # Create a list to store supply distribution
-    supply_distribution = []
-
-    # Iterate through the supply list
-    for supplier in supply:
-        supplier_id = supplier[0]
-        supplier_supply = int(float(supplier[2]))
-        
-        # Find the corresponding rows in the facility list
-        for facility in facilitylist:
-            if facility[0] == supplier_id:
-                demander_id = facility[1]
-                if demander_id in remaining_demand:
-                    demander_demand = remaining_demand[demander_id]
-                    if supplier_supply >= demander_demand:
-                        supply_distribution.append([supplier_id, demander_id, demander_demand])
-                        supplier_supply -= demander_demand
-                        remaining_demand[demander_id] = 0
-                    else:
-                        supply_distribution.append([supplier_id, demander_id, supplier_supply])
-                        remaining_demand[demander_id] -= supplier_supply
-                        supplier_supply = 0
-                    if supplier_supply == 0:
-                        break
-    
-    # Update the demand list with the remaining demand
-    for row in demand:
-        row[2] = max(remaining_demand[row[0]], 0)
-    
-    # Create a DataFrame from the supply distribution
-    df_supply_distribution = pd.DataFrame(supply_distribution, columns=['SupplierID', 'DemanderID', 'SupplyAmount'])
-    
-    return demand, df_supply_distribution
-
-
 def fill_demand_competition(facilitylist, supply, demand):
     # Create a dictionary to store remaining demand
     remaining_demand = {row[0]: int(float(row[2])) for row in demand}
@@ -225,7 +185,12 @@ def find_optimal_distribution_greedy(facilitylist, supply, demand):
 
     # Create the supply distribution DataFrame
     df_supply_distribution = pd.DataFrame(supply_distribution, columns=['SupplierID', 'DemanderID', 'SupplyAmount', 'Distance'])
-    return df_supply_distribution
+
+    # Create the remaining demand DataFrame, including demanders with zero demand
+    remaining_demand = [[demander, max(demand_dict[demander], 0)] for demander in demanders]
+    df_remaining_demand = pd.DataFrame(remaining_demand, columns=['DemanderID', 'RemainingDemand'])
+
+    return df_supply_distribution, df_remaining_demand
 
 
 # Example usage
@@ -238,14 +203,12 @@ demand = read_csv_to_list(join_path("Model/CSVLib/CountyData.csv"))
 print(f" The Total Supply is {sum_total_supply(supply)}")
 print(f" The Total Demand is {sum_total_demand(demand)}")
 
-correlated_demand, df1 = fill_demand_correlation(facilitylist, supply, demand)
 competition_demand, df2 = fill_demand_competition(facilitylist, supply, demand)
 
-df1.to_csv(join_path("Model/CSVLib/SupplyDistributionCorrelation.csv"), index=False)
 df2.to_csv(join_path("Model/CSVLib/SupplyDistributionCompetition.csv"), index=False)
-save_demand_to_csv(correlated_demand, join_path("Model/CSVLib/CountyDataCorrelation.csv"))
 save_demand_to_csv(competition_demand, join_path("Model/CSVLib/CountyDataCompetition.csv"))
 
-df_optimal_distribution = find_optimal_distribution_greedy(facilitylist, supply, demand)
+df_optimal_distribution, df_remaining_demand = find_optimal_distribution_greedy(facilitylist, supply, demand)
 if df_optimal_distribution is not None:
-    df_optimal_distribution.to_csv(join_path("Model/CSVLib/OptimalSupplyDistributionGreedy.csv"), index=False)
+    df_optimal_distribution.to_csv(join_path("Model/CSVLib/OptimalSupplyDistributionCorrelated.csv"), index=False)
+    df_remaining_demand.to_csv(join_path("Model/CSVLib/RemainingDemandCorrelatedy.csv"), index=False)
