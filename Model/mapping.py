@@ -32,15 +32,55 @@ def plot_points_on_map(factories,counties, map_center, zoom_start=10):
     for i in range(len(counties)):
         folium.Marker([counties[i][1], counties[i][2]], popup=counties[i][0], tooltip=counties[i][0], icon=folium.CustomIcon('county.png',icon_size=(40,40))).add_to(m)
         
-        
-    #routes = pd.read_csv("Model\CSVLib\Routes.csv", header=1)
+    routefile = "Model/CSVLib/DistributionConnected.csv"
+    #routefile = "Model\CSVLib\Routes.csv"
+    routes = pd.read_csv(routefile, header=1)
     for i in range(routes.shape[0]):
-        coordinates =[[routes.values[i][2],routes.values[i][3]],[routes.values[i][5],routes.values[i][6]]]
+        #coordinates =[[routes.values[i][2],routes.values[i][3]],[routes.values[i][5],routes.values[i][6]]]
+        coordinates =[[routes.values[i][1],routes.values[i][2]],[routes.values[i][4],routes.values[i][5]]]
         folium.PolyLine(coordinates, color="blue", weight=2.5, opacity=1).add_to(m)
         
     return m
 
-# Example usage:
+
+def create_supply_distribution_with_coordinates(optimal_distribution_path, locations_path, output_path):
+    locations_df = pd.read_csv(locations_path)
+    locations_dict = locations_df.set_index('ID')[['Lat', 'Lon']].to_dict('index')
+    optimal_distribution_df = pd.read_csv(optimal_distribution_path)
+    new_rows = []
+    for _, row in optimal_distribution_df.iterrows():
+        supplier_id = row['SupplierID']
+        demander_id = row['DemanderID']
+        supply_amount = row['SupplyAmount']
+        supplier_coords = locations_dict[supplier_id]
+        demander_coords = locations_dict[demander_id]
+        new_row = {
+            'SupplierID': supplier_id,
+            'Supplier Latitude': supplier_coords['Lat'],
+            'Supplier Longitude': supplier_coords['Lon'],
+            'DemanderID': demander_id,
+            'Demander Latitude': demander_coords['Lat'],
+            'Demander Longitude': demander_coords['Lon'],
+            'Supply Amount / Demand': supply_amount
+        }
+        
+        new_rows.append(new_row)
+    new_df = pd.DataFrame(new_rows)
+    new_df.to_csv(output_path, index=False)
+
+
+
+
+#optimal_distribution_path = 'Model/CSVLib/OptimalSupplyDistributionGreedy.csv'
+optimal_distribution_path = 'Model/CSVLib/Distribution.csv'
+#optimal_distribution_path = 'Model/CSVLib/OptimalSupplyDistributionWithTrucks.csv'
+locations_path = 'Model/CSVLib/LocationsHeader.csv'
+output_path = 'Model/CSVLib/DistributionConnected.csv'
+
+create_supply_distribution_with_coordinates(optimal_distribution_path, locations_path, output_path)
+
+
+
 
 
 map_center = (28.414289381046988, -81.7597650824977)  # Approximate center of the US
