@@ -2,6 +2,13 @@ import folium
 import numpy as np
 import csv
 import pandas as pd
+import os
+
+def join_path(filename):
+    current_dir = os.getcwd()
+    parent_dir = os.path.dirname(current_dir)
+    file_path = os.path.join(parent_dir, filename)
+    return file_path
 
 def csv_to_list_of_lists(csv_file):
     """Reads a CSV file and returns its contents as a list of lists."""
@@ -10,10 +17,7 @@ def csv_to_list_of_lists(csv_file):
         reader = csv.reader(file, delimiter=",")
         return list(reader)
 
-factories = csv_to_list_of_lists('factories.csv')
-counties  = csv_to_list_of_lists('counties.csv')
-
-def plot_points_on_map(factories,counties, map_center, zoom_start=10):
+def plot_points_on_map(routefile, factories,counties, map_center, zoom_start=10):
     """
     Plots multiple latitude/longitude points on a map using Folium.
     
@@ -28,12 +32,10 @@ def plot_points_on_map(factories,counties, map_center, zoom_start=10):
     # Add markers for each point
 
     for i in range(len(factories)):
-        folium.Marker([factories[i][1], factories[i][2]], popup=factories[i][0], tooltip=factories[i][0], icon=folium.CustomIcon('factory.png',icon_size=(40,40))).add_to(m)
+        folium.Marker([factories[i][1], factories[i][2]], popup=factories[i][0], tooltip=factories[i][0], icon=folium.CustomIcon(join_path('Model/ASsets/factory.png'),icon_size=(40,40))).add_to(m)
     for i in range(len(counties)):
-        folium.Marker([counties[i][1], counties[i][2]], popup=counties[i][0], tooltip=counties[i][0], icon=folium.CustomIcon('county.png',icon_size=(40,40))).add_to(m)
+        folium.Marker([counties[i][1], counties[i][2]], popup=counties[i][0], tooltip=counties[i][0], icon=folium.CustomIcon(join_path('Model/Assets/county.png'),icon_size=(40,40))).add_to(m)
         
-    routefile = "Model/CSVLib/DistributionConnected.csv"
-    #routefile = "Model\CSVLib\Routes.csv"
     routes = pd.read_csv(routefile, header=1)
     for i in range(routes.shape[0]):
         #coordinates =[[routes.values[i][2],routes.values[i][3]],[routes.values[i][5],routes.values[i][6]]]
@@ -69,24 +71,18 @@ def create_supply_distribution_with_coordinates(optimal_distribution_path, locat
     new_df.to_csv(output_path, index=False)
 
 
+def Mapping(optimal_distribution_path, output_path):
 
+    # Read the CSV files
+    factories = csv_to_list_of_lists(join_path('Model/CSVLib/factories.csv'))
+    counties  = csv_to_list_of_lists(join_path('Model/CSVLib/counties.csv'))
+    locations_path = join_path('Model/CSVLib/LocationsHeader.csv')
 
-#optimal_distribution_path = 'Model/CSVLib/OptimalSupplyDistributionGreedy.csv'
-optimal_distribution_path = 'Model/CSVLib/Distribution.csv'
-#optimal_distribution_path = 'Model/CSVLib/OptimalSupplyDistributionWithTrucks.csv'
-locations_path = 'Model/CSVLib/LocationsHeader.csv'
-output_path = 'Model/CSVLib/DistributionConnected.csv'
+    IntermediateRouteCSV = join_path('Model/CSVIntermediates/DistributionConnected.csv')
+    create_supply_distribution_with_coordinates(join_path(optimal_distribution_path), locations_path, IntermediateRouteCSV)
 
-create_supply_distribution_with_coordinates(optimal_distribution_path, locations_path, output_path)
+    map_center = (28.414289381046988, -81.7597650824977)  # Approximate center of the US
+    map_object = plot_points_on_map(IntermediateRouteCSV, factories, counties, map_center)
 
-
-
-
-
-map_center = (28.414289381046988, -81.7597650824977)  # Approximate center of the US
-map_object = plot_points_on_map(factories, counties, map_center)
-
-
-# Save the map to an HTML file and display it
-map_object.save("map.html")
-print("Map saved as map.html. Open it in a browser to view.")
+    # Save the map to an HTML file and display it
+    map_object.save(join_path(output_path))
