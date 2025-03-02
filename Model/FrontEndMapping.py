@@ -78,7 +78,7 @@ def Mapping(optimal_distribution_path, output_path):
     counties  = csv_to_list_of_lists(join_path('Model/CSVLib/counties.csv'))
     locations_path = join_path('Model/CSVLib/LocationsHeader.csv')
 
-    IntermediateRouteCSV = join_path('Model/CSVIntermediates/DistributionConnected.csv')
+    IntermediateRouteCSV = join_path('Model/CSVCSVWorking/DistributionConnected.csv')
     create_supply_distribution_with_coordinates(join_path(optimal_distribution_path), locations_path, IntermediateRouteCSV)
 
     map_center = (28.414289381046988, -81.7597650824977)  # Approximate center of the US

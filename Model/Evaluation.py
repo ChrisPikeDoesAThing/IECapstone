@@ -19,16 +19,23 @@ def csv_to_dict_list(csv_file_path, has_headers=0):
             dict_list.append(row_dict)
     return dict_list
 
+def read_csv_to_list(file_path):
+    data = []
+    with open(file_path, mode='r') as file:
+        csv_reader = csv.reader(file)
+        for row in csv_reader:
+            data.append(row)
+    return data
+
+
 def add_supply_amount_to_county_data(transparent_distribution_path, county_data_path, output_path):
-    transparent_distribution = csv_to_dict_list(transparent_distribution_path, has_headers=1)
-    county_data = csv_to_dict_list(county_data_path, has_headers=0)
-    supply_dict = {row[1]: float(row[2]) for row in transparent_distribution}
-    
+    transparent_distribution = read_csv_to_list(transparent_distribution_path)
+    county_data = read_csv_to_list(county_data_path)
+
     for row in county_data:
-        county_id = row[0]
-        if county_id in supply_dict:
-            row[2] = str(float(row[2]) - supply_dict[county_id])
-    
+        for dist in transparent_distribution:
+            if dist[1] == row[0]:
+                row[2] = round(float(row[2])) - round(float(dist[2]))
     with open(output_path, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['ID', 'County', 'Updated Demand'])

@@ -117,11 +117,10 @@ def Trial(facilitylist,iteration = None,Mtype = "Transparent",method="distance")
         method = 3
 
     for supplier in Supply: ### Iterate through suppliers
-        distributionqty = 0
         filtered_facilities = sorted(filter_facilitylist_by_id(facilitylist, supplier.Id), key=lambda x: x[method]) ### Filter by supplier Id and Sort by distance/time
         for facility in filtered_facilities:
             demander = int(facility[1]) ### Get Demander Id
-
+            distributionqty = 0
             if (Locations[demander].Inventory < 0) and (Locations[supplier.Id].Inventory > 0): ### If Demand is not met
 
                 #Cases
@@ -145,9 +144,8 @@ def Trial(facilitylist,iteration = None,Mtype = "Transparent",method="distance")
                 #print(Locations[supplier.Id].Inventory)
             if distributionqty > 0:
                 Distribution.append([supplier.Id,demander,distributionqty])
-
-            if Mtype != "Transparent":
-                Locations[demander].Inventory -= distributionqty
+                if Mtype != "Transparent":
+                    Locations[demander].Inventory -= distributionqty
     return Locations,Distribution
  
 
