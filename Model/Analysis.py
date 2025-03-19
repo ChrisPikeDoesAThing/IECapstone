@@ -23,16 +23,19 @@ def csv_to_dict_list(csv_file_path, has_headers=0):
             dict_list.append(row_dict)
     return dict_list
 
-def find_differences_in_demand(inputpath1, inputpath2, output_path):
-    input1 = csv_to_dict_list(inputpath1, has_headers=0)
-    input2 = csv_to_dict_list(inputpath2, has_headers=0)
+def find_demand_difference(Original, Updated, output_path):
+    input1 = csv_to_dict_list(Original, has_headers=1)
+    input2 = csv_to_dict_list(Updated, has_headers=0)
     
     demand_diff = []
     
     for original in input1:
         for updated in input2:
             if original[0] == updated[0]:
-                diff = float(original[2]) - float(updated[2])
+                if float(original[2]) == 0:
+                    diff = 0
+                else:
+                    diff = round((float(original[2])-(float(updated[2]))))
                 demand_diff.append([original[0], original[1], diff])
                 break
     
@@ -60,42 +63,36 @@ def find_demand_fill(inputpath1, inputpath2, output_path):
     
     with open(output_path, mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['ID', 'County', 'Demand Difference'])
+        writer.writerow(['ID', 'County', 'Demand Fill'])
         for row in demand_diff:
             writer.writerow(row)
 
 # Example usage
-def find_difference(file1path, file2path, outputpath1):
-    countydatapath = join_path(file1path)
-    datapath = join_path(file2path)
+def find_fill_and_difference(Original, Updated, outputpath1,outputpath2):
+    OriginalDemand = join_path(Original)
+    UpdatedDemand = join_path(Updated)
 
    #
-   #  find_differences_in_demand(countydatapath, datapath, join_path(outputpath1))
-    find_demand_fill(countydatapath, datapath, join_path(outputpath1))
+   #  find_differences_in_demand(OriginalDemand, UpdatedDemand, join_path(outputpath1))
+    find_demand_fill(OriginalDemand, UpdatedDemand, join_path(outputpath1))
+    find_demand_difference(OriginalDemand, UpdatedDemand, join_path(outputpath2))
 
-def analyze_csv_files(transparent_demand_path, non_transparent_demand_path,  county_data_path):
-    """
-    Perform analysis on the given CSV files and output the results to an Excel file.
-    
-    :param transparent_demand_path: Path to the TransparentDemand.csv file
-    :param transparent_distribution_path: Path to the TransparentDistribution.csv file
-    :param non_transparent_demand_path: Path to the NonTransparentDemand.csv file
-    :param non_transparent_distribution_path: Path to the NonTransparentDistribution.csv file
-    :param county_data_path: Path to the CountyData.csv file
-    :param output_excel_path: Path to the output Excel file
-    """
+def analyze_csv_files(transparent_demand_path,transparent_demand_difference_path, non_transparent_demand_path, non_transparent_demand_difference_path,county_data_path):
+ 
     # Read the CSV files
     transparent_demand = pd.read_csv(join_path(transparent_demand_path))
     non_transparent_demand = pd.read_csv(join_path(non_transparent_demand_path))
-
+    
     county_data = pd.read_csv(join_path(county_data_path))
     
     # Perform analysis
-    county_data['Transparent Fairness'] = transparent_demand['Updated Demand'] / county_data['DEMAND']
-    county_data['Non-Transparent Fairness'] = non_transparent_demand['Updated Demand'] / county_data['DEMAND']
+    county_data['Transparent Fairness'] =  (county_data['DEMAND'] - transparent_demand['Updated Demand'])/ county_data['DEMAND'] 
+    county_data['Non-Transparent Fairness'] =  (county_data['DEMAND'] - non_transparent_demand['Updated Demand'])/ county_data['DEMAND']
+    county_data.to_csv(join_path('Model/CSVResults/Analysis.csv'))
     
     # Calculate average and standard deviation
     avg_transparent_fairness = county_data['Transparent Fairness'].mean()
+    print(avg_transparent_fairness)
     std_transparent_fairness = county_data['Transparent Fairness'].std()
     avg_non_transparent_fairness = county_data['Non-Transparent Fairness'].mean()
     std_non_transparent_fairness = county_data['Non-Transparent Fairness'].std()

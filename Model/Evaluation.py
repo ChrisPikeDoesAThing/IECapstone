@@ -44,7 +44,7 @@ def add_supply_amount_to_county_data(transparent_distribution_path, county_data_
         for row in county_data:
             writer.writerow([row[0], row[1], row[2]])
 
-# Example usage
+
 def Evaluate(inputpath, outputpath):
     county_data_path = join_path('Model/CSVLib/CountyData.csv')
     add_supply_amount_to_county_data(join_path(inputpath), county_data_path, join_path(outputpath))

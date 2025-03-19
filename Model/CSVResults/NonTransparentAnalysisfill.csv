@@ -1,68 +1,68 @@
-ID,County,Demand Difference
-26,Alachua,-35.564
-27,Baker,-39.022
-28,Bay,-38.021
-29,Bradford,-37.021
-30,Brevard,-36.633
-31,Broward,-36.02
-32,Calhoun,-38.022
-33,Charlotte,-37.021
-34,Citrus,-34.707
-35,Clay,-37.02
-36,Collier,-39.02
-37,Columbia,-38.02
-38,DeSoto,-35.023
-39,Dixie,-38.021
-40,Duval,-40.02
-41,Escambia,-40.199
-42,Flagler,-36.021
-43,Franklin,-38.021
-44,Gadsden,-38.021
-45,Gilchrist,-38.024
-46,Glades,-37.026
-47,Gulf,-38.023
-48,Hamilton,-39.021
-49,Hardee,-35.021
-50,Hendry,-38.021
-51,Hernando,-36.021
-52,Highlands,-35.021
-53,Hillsborough,-33.496
-54,Holmes,-38.022
-55,Indian River,-37.02
-56,Jackson,-38.022
-57,Jefferson,-38.024
-58,Lafayette,-39.022
-59,Lake,-33.272
-60,Lee,-37.02
-61,Leon,-38.021
-62,Levy,-36.201
-63,Liberty,-38.025
-64,Madison,-38.021
-65,Manatee,-35.02
-66,Marion,-36.02
-67,Martin,-38.021
-68,Miami-Dade,-36.795
-69,Monroe,-39.021
-70,Nassau,-40.021
-71,Okaloosa,-39.021
-72,Okeechobee,-37.022
-73,Orange,-33.863
-74,Osceola,-36.021
-75,Palm Beach,-36.899
-76,Pasco,-35.331
-77,Pinellas,-34.807
-78,Polk,-35.021
-79,Putnam,-36.021
-80,Santa Rosa,-39.02
-81,Sarasota,-36.021
-82,Seminole,-35.341
-83,St. Johns,-38.286
-84,St. Lucie,-37.286
-85,Sumter,-33.021
-86,Suwannee,-39.022
-87,Taylor,-39.022
-88,Union,-37.024
-89,Volusia,-37.021
-90,Wakulla,-38.021
-91,Walton,-38.021
-92,Washington,-38.022
+ID,County,Demand Fill
+26,Alachua,1.246
+27,Baker,1.0
+28,Bay,-2.756
+29,Bradford,2.0
+30,Brevard,-2.0
+31,Broward,-3.425
+32,Calhoun,-2.0
+33,Charlotte,-3.0
+34,Citrus,1.0
+35,Clay,1.0
+36,Collier,-4.0
+37,Columbia,2.0
+38,DeSoto,-3.0
+39,Dixie,-0.0
+40,Duval,0.758
+41,Escambia,-3.0
+42,Flagler,-1.0
+43,Franklin,-3.0
+44,Gadsden,-2.0
+45,Gilchrist,1.0
+46,Glades,-4.0
+47,Gulf,-3.0
+48,Hamilton,-0.0
+49,Hardee,-3.0
+50,Hendry,-4.0
+51,Hernando,-0.0
+52,Highlands,-3.0
+53,Hillsborough,-1.313
+54,Holmes,-2.0
+55,Indian River,-3.0
+56,Jackson,-2.0
+57,Jefferson,-1.0
+58,Lafayette,-0.0
+59,Lake,0.237
+60,Lee,-4.0
+61,Leon,-0.571
+62,Levy,1.0
+63,Liberty,-3.0
+64,Madison,-1.0
+65,Manatee,-3.0
+66,Marion,-0.477
+67,Martin,-3.0
+68,Miami-Dade,-3.672
+69,Monroe,-4.0
+70,Nassau,-0.71
+71,Okaloosa,-3.0
+72,Okeechobee,-4.0
+73,Orange,-0.376
+74,Osceola,-3.0
+75,Palm Beach,-3.0
+76,Pasco,-0.835
+77,Pinellas,-2.876
+78,Polk,-2.147
+79,Putnam,-0.0
+80,Santa Rosa,-3.0
+81,Sarasota,-3.59
+82,Seminole,-1.0
+83,St. Johns,-1.0
+84,St. Lucie,-3.231
+85,Sumter,-0.0
+86,Suwannee,-0.0
+87,Taylor,0.0
+88,Union,2.0
+89,Volusia,-1.131
+90,Wakulla,-2.0
+91,Walton,-3.0
+92,Washington,-2.0
