@@ -19,9 +19,11 @@ def csv_to_dict_list(csv_file_path, has_headers=0):
             dict_list.append(row_dict)
     return dict_list
 
-def read_csv_to_list(file_path):
+def read_csv_to_list(file_path,has_headers=0):
     data = []
     with open(file_path, mode='r') as file:
+        if has_headers:
+            headers = next(file)
         csv_reader = csv.reader(file)
         for row in csv_reader:
             data.append(row)
@@ -30,7 +32,7 @@ def read_csv_to_list(file_path):
 
 def add_supply_amount_to_county_data(transparent_distribution_path, county_data_path, output_path):
     transparent_distribution = read_csv_to_list(transparent_distribution_path)
-    county_data = read_csv_to_list(county_data_path)
+    county_data = read_csv_to_list(county_data_path,has_headers=1)
 
     for row in county_data:
         for dist in transparent_distribution:
@@ -42,7 +44,7 @@ def add_supply_amount_to_county_data(transparent_distribution_path, county_data_
         for row in county_data:
             writer.writerow([row[0], row[1], row[2]])
 
-# Example usage
+
 def Evaluate(inputpath, outputpath):
     county_data_path = join_path('Model/CSVLib/CountyData.csv')
     add_supply_amount_to_county_data(join_path(inputpath), county_data_path, join_path(outputpath))

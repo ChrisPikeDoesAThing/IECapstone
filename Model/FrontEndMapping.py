@@ -35,12 +35,15 @@ def plot_points_on_map(routefile, factories,counties, map_center, zoom_start=10)
         folium.Marker([factories[i][1], factories[i][2]], popup=factories[i][0], tooltip=factories[i][0], icon=folium.CustomIcon(join_path('Model/ASsets/factory.png'),icon_size=(40,40))).add_to(m)
     for i in range(len(counties)):
         folium.Marker([counties[i][1], counties[i][2]], popup=counties[i][0], tooltip=counties[i][0], icon=folium.CustomIcon(join_path('Model/Assets/county.png'),icon_size=(40,40))).add_to(m)
-        
-    routes = pd.read_csv(routefile, header=1)
-    for i in range(routes.shape[0]):
-        #coordinates =[[routes.values[i][2],routes.values[i][3]],[routes.values[i][5],routes.values[i][6]]]
-        coordinates =[[routes.values[i][1],routes.values[i][2]],[routes.values[i][4],routes.values[i][5]]]
-        folium.PolyLine(coordinates, color="blue", weight=2.5, opacity=1).add_to(m)
+
+    try:    
+        routes = pd.read_csv(routefile, header=1)
+        for i in range(routes.shape[0]):
+            #coordinates =[[routes.values[i][2],routes.values[i][3]],[routes.values[i][5],routes.values[i][6]]]
+            coordinates =[[routes.values[i][1],routes.values[i][2]],[routes.values[i][4],routes.values[i][5]]]
+            folium.PolyLine(coordinates, color="blue", weight=2.5, opacity=1).add_to(m)
+    except:
+        print("No routes to plot")
         
     return m
 
@@ -78,7 +81,7 @@ def Mapping(optimal_distribution_path, output_path):
     counties  = csv_to_list_of_lists(join_path('Model/CSVLib/counties.csv'))
     locations_path = join_path('Model/CSVLib/LocationsHeader.csv')
 
-    IntermediateRouteCSV = join_path('Model/CSVCSVWorking/DistributionConnected.csv')
+    IntermediateRouteCSV = join_path('Model/CSVIntermediates/DistributionConnected.csv')
     create_supply_distribution_with_coordinates(join_path(optimal_distribution_path), locations_path, IntermediateRouteCSV)
 
     map_center = (28.414289381046988, -81.7597650824977)  # Approximate center of the US

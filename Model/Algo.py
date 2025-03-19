@@ -43,6 +43,8 @@ def csv_to_dict_list(csv_file_path, has_headers=0):
     dict_list = []
     with open(csv_file_path, mode='r') as file:
         csv_reader = csv.reader(file)
+        for row in range(has_headers):
+            next(csv_reader)
         for row in csv_reader:
             row_dict = {i: row[i] for i in range(len(row))}
             dict_list.append(row_dict)
@@ -81,18 +83,18 @@ class Location():
         self.Longitude = longitude
         self.Inventory = inventory
 
-def InitializeLocations(iteration = None): ### Initialize Locations
+def InitializeLocations(Supply, Demand, LatLong, iteration = None): ### Initialize Locations
 
     ### Load CSVS
-    Supply = csv_to_dict_list(join_path("Model/CSVLib/SupplierData.csv"))
-    Demand = csv_to_dict_list(join_path("Model/CSVLib/CountyData.csv"))
-    LatLong = csv_to_dict_list(join_path("Model/CSVLib/Locations.csv"))
+    Supply = csv_to_dict_list(join_path(Supply), has_headers=1)
+    Demand = csv_to_dict_list(join_path(Demand), has_headers=1)
+    LatLong = csv_to_dict_list(join_path(LatLong), has_headers=0)
     Locations = []
     Suppliers = []
     Counties = []
     ### Create Location Objects
     for supply in Supply:
-        location = Location(supply[0],supply[1], (1/52) * int(float(supply[2])),LatLong[int(supply[0])][2],LatLong[int(supply[0])][3])
+        location = Location(supply[0],supply[1], int(float(supply[2])),LatLong[int(supply[0])][2],LatLong[int(supply[0])][3])
         Locations.append(location)
         Suppliers.append(location)
     for demand in Demand:
@@ -107,8 +109,8 @@ def InitializeLocations(iteration = None): ### Initialize Locations
         random.shuffle(Suppliers)
     return Locations,Suppliers,Counties
 
-def Trial(facilitylist,iteration = None,Mtype = "Transparent",method="distance"):
-    Locations,Supply,Demand = InitializeLocations(iteration) ### Initialize Locations
+def Trial(supplypath,demandpath,latlongpath, facilitylist,iteration = None,Mtype = "Transparent",method="distance"):
+    Locations,Supply,Demand = InitializeLocations(supplypath,demandpath,latlongpath,iteration) ### Initialize Locations
     Distribution = []
     qtysum = 0
     if method == "distance":
@@ -171,7 +173,7 @@ def EvaluateDistribution(Distribution,facilitylist): ### Evaluate Distribution
     return costsum, [maxtime,timesum]
 
 
-def Iterate(trials=1,Mtype="Transparent",method="distance"): ### Iterate through trials
+def Iterate(supplypath,demandpath,latlongpath,trials=1,Mtype="Transparent",method="distance"): ### Iterate through trials
     facilitylist = convert_third_item_to_int(read_csv_to_list(join_path("Model/CSVLib/DistanceListShort.csv"))) ### Load Distance List
     costdistribution  = []
 
@@ -180,16 +182,16 @@ def Iterate(trials=1,Mtype="Transparent",method="distance"): ### Iterate through
 
     for i in range(trials): ### Iterate through trials
         if i == 0: ### First Trial, fixed facilitylist
-            Locations, Distribution = Trial(facilitylist,i,Mtype=Mtype,method=method)
+            Locations, Distribution = Trial(supplypath,demandpath,latlongpath,facilitylist,i,Mtype=Mtype,method=method)
         else: ### Subsequent Trials, random facilitylist
-            Locations, Distribution = Trial(facilitylist,Mtype=Mtype,method=method)
+            Locations, Distribution = Trial(supplypath,demandpath,latlongpath,facilitylist,Mtype=Mtype,method=method)
         cost,time = EvaluateDistribution(Distribution, facilitylist) ### Evaluate Distribution
         costdistribution.append([cost, Distribution, Locations, time]) ### Append to costdistribution
     return costdistribution, Locations
 
 
-def Minimize(outputfile,trials=1,Mtype="Transparent",method="distance"): ### Minimize Cost
-    costdistribution,Locations = Iterate(trials=trials,Mtype=Mtype) ### Iterate through trials
+def Minimize(supplypath,demandpath,latlongpath,outputfile,trials=1,Mtype="Transparent",method="distance"): ### Minimize Cost
+    costdistribution,Locations = Iterate(supplypath,demandpath,latlongpath,trials=trials,Mtype=Mtype) ### Iterate through trials
     costdistribution = sorted(costdistribution, key=lambda x: x[0]) ### Sort by cost
     df = pd.DataFrame(costdistribution[0][1], columns=['SupplierID', 'DemanderID', 'SupplyAmount']) ### Create distribution DataFrame
     df.to_csv(join_path(outputfile), index=False) ### Save to CSV
