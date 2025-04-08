@@ -98,7 +98,7 @@ def InitializeLocations(Supply, Demand, LatLong, iteration = None): ### Initiali
         Locations.append(location)
         Suppliers.append(location)
     for demand in Demand:
-        location = Location(demand[0],demand[1],-1 * int(float(demand[2])),LatLong[int(demand[0])][2],LatLong[int(demand[0])][3])
+        location = Location(demand[0],demand[1], -1*int(float(demand[2])),LatLong[int(demand[0])][2],LatLong[int(demand[0])][3])
         Locations.append(location)
         Counties.append(location)
 

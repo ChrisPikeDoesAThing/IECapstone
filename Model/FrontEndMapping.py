@@ -41,7 +41,7 @@ def plot_points_on_map(routefile, factories,counties, map_center, zoom_start=10)
         for i in range(routes.shape[0]):
             #coordinates =[[routes.values[i][2],routes.values[i][3]],[routes.values[i][5],routes.values[i][6]]]
             coordinates =[[routes.values[i][1],routes.values[i][2]],[routes.values[i][4],routes.values[i][5]]]
-            folium.PolyLine(coordinates, color="blue", weight=2.5, opacity=1).add_to(m)
+            folium.PolyLine(coordinates, color=color_map(routes.values[i][6]), weight=2.5, opacity=1).add_to(m)
     except:
         print("No routes to plot")
         
@@ -89,3 +89,17 @@ def Mapping(optimal_distribution_path, output_path):
 
     # Save the map to an HTML file and display it
     map_object.save(join_path(output_path))
+
+def color_map(value):
+    if value < 25000:
+        return 'Purple'
+    elif value < 50000:
+        return 'Blue'
+    elif value < 75000:
+            return 'Green'
+    elif value < 100000:
+            return 'Yellow'
+    elif value < 150000:
+        return 'Orange'
+    else:
+            return 'red'
